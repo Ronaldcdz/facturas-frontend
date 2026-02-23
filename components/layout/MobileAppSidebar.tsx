@@ -19,7 +19,7 @@ type Page = {
 export function MobileAppSidebar({ routes }: { routes: Page[] }) {
   return (
     <>
-      <header className="flex justify-between px-4 py-2 ">
+      <header className="flex justify-between px-4 py-2 bg-secondary">
         <h1>Billing App</h1>
         <SidebarTrigger />
       </header>
