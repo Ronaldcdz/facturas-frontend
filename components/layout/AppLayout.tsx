@@ -29,7 +29,7 @@ const ROUTES: Page[] = [
   {
     title: "Dashboard",
     icon: LayoutDashboard,
-    href: "/",
+    href: "/dashboard",
   },
   {
     title: "Facturas",
@@ -39,7 +39,7 @@ const ROUTES: Page[] = [
   {
     title: "Clientes",
     icon: Users,
-    href: "/customers",
+    href: "/clientes",
   },
   {
     title: "Servicios",
@@ -59,12 +59,12 @@ export default function AppLayout({
 }>) {
   return (
     <div className="flex flex-col w-full md:flex-row">
-      <div className="md:hidden">
-        <header className="flex justify-between px-4 py-2 ">
-          <h1>Billing App</h1>
-          <SidebarTrigger />
-        </header>
-      </div>
+      {/* <div className="md:hidden"> */}
+      {/*   <header className="flex justify-between px-4 py-2 bg-white"> */}
+      {/*     <h1>Billing App</h1> */}
+      {/*     <SidebarTrigger /> */}
+      {/*   </header> */}
+      {/* </div> */}
 
       <Sidebar>
         <SidebarHeader className="px-3 pt-4">
