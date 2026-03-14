@@ -4,16 +4,13 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus } from "lucide-react";
+import { CreateClientForm } from "./CreateClienteForm";
 
 export function CreateClientModal() {
   return (
@@ -29,7 +26,7 @@ export function CreateClientModal() {
           </Button>
         </DialogTrigger>
         <DialogContent
-          className="min-h-screen min-w-screen rounded-none"
+          className="rounded-none flex flex-col h-full min-w-screen"
           showCloseButton={false}
         >
           <DialogHeader>
@@ -46,25 +43,16 @@ export function CreateClientModal() {
               </DialogTitle>
               <div></div>
             </div>
-            <div className="-mt-4">
+            <div className="-mt-4 p-0">
               <hr className="border-t border-border my-4" />
             </div>
           </DialogHeader>
-          <FieldGroup>
-            <Field>
-              <Label htmlFor="name-1">Name</Label>
-              <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
-            </Field>
-            <Field>
-              <Label htmlFor="username-1">Username</Label>
-              <Input id="username-1" name="username" defaultValue="@peduarte" />
-            </Field>
-          </FieldGroup>
+          <CreateClientForm />
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">Cancelar</Button>
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit">Guardar cambios</Button>
           </DialogFooter>
         </DialogContent>
       </form>
