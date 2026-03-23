@@ -11,10 +11,10 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Hash, Mail, MapPin, Phone, User, Map, Loader2, AlertCircleIcon, AlertCircle } from "lucide-react";
+import { Hash, Mail, MapPin, Phone, User, Map, Loader2, AlertCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  SubmitHandler,
+
   useForm,
   useController,
   Control,
@@ -23,8 +23,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ClienteInput, ClienteOutput, ClienteSchema, Provincia } from "./schema";
-import { startTransition, useActionState, useEffect, useState } from "react";
-import { createCliente } from "@/app/actions/clientes";
+import { startTransition, useActionState, useEffect } from "react";
+import { ActionState, createCliente } from "@/app/actions/clientes";
 import { flattenErrors, objectToFormData } from "@/lib/utils";
 import { toast } from "sonner";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -43,8 +43,7 @@ export function CreateClientForm({ provincias }: Props) {
     resolver: zodResolver(ClienteSchema),
   });
 
-  const [state, formAction, isPending] = useActionState(createCliente, null)
-  const [error, setError] = useState<boolean>();
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(createCliente, null)
 
   useEffect(() => {
     if (!state) return;
@@ -187,19 +186,16 @@ function PhoneInput({ control }: { control: Control<ClienteInput> }) {
 
   const {
     field: { value, onChange, onBlur, ref },
-  } = useController({
+  } = useController<ClienteInput, "telefono">({
     name: "telefono",
     control,
   });
 
-  const [display, setDisplay] = useState(() => formatPhone(value || ""));
+  const displayValue = formatPhone(String(value ?? ""));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    const formatted = formatPhone(raw);
-    setDisplay(formatted);
-    const digits = raw.replace(/\D/g, "").slice(0, 10);
-    onChange(digits); // store raw digits
+    const rawDigits = e.target.value.replace(/\D/g, "").slice(0, 10);
+    onChange(rawDigits);
   };
 
   return (
@@ -208,7 +204,7 @@ function PhoneInput({ control }: { control: Control<ClienteInput> }) {
       type="tel"
       placeholder="829-708-0566"
       className="pl-8"
-      value={display}
+      value={displayValue}
       onChange={handleChange}
       onBlur={onBlur}
       ref={ref}
@@ -238,19 +234,16 @@ function RncInput({ control }: { control: Control<ClienteInput> }) {
 
   const {
     field: { value, onChange, onBlur, ref },
-  } = useController({
+  } = useController<ClienteInput, "rnc">({
     name: "rnc",
     control,
   });
 
-  const [display, setDisplay] = useState(() => formatDocument(value || ""));
+  const displayValue = formatDocument(String(value ?? ""));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    const formatted = formatDocument(raw);
-    setDisplay(formatted);
-    const digits = raw.replace(/\D/g, "").slice(0, 11);
-    onChange(digits);
+    const rawDigits = e.target.value.replace(/\D/g, "").slice(0, 11);
+    onChange(rawDigits);
   };
 
   return (
@@ -259,7 +252,7 @@ function RncInput({ control }: { control: Control<ClienteInput> }) {
       type="text"
       placeholder="RNC: 1-23-45678-9 / Cédula: 001-1234567-8"
       className="pl-8"
-      value={display}
+      value={displayValue}
       onChange={handleChange}
       onBlur={onBlur}
       ref={ref}

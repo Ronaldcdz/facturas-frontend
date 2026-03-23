@@ -2,10 +2,17 @@
 
 import { ClienteSchema } from "@/components/features/clientes/schema";
 import { formDataToObject } from "@/lib/utils";
+import z from "zod";
+
+export type ActionState = {
+  success: boolean;
+  message?: string;
+  errors?: z.ZodIssue[] | { _form: string[] };
+} | null;
 
 const url = 'http://localhost:3000/clientes';
 
-export async function createCliente(prevState: never, formData: FormData) {
+export async function createCliente(prevState: ActionState, formData: FormData) {
   console.log("createCliente")
   console.log(typeof formData);
   console.log(formData);

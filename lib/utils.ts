@@ -126,21 +126,32 @@ type ServerErrors =
   | null
   | undefined;
 
+import { ZodIssue } from "zod";
+
 /**
  * Convierte cualquier estructura de errores en un array de strings.
- * - Si `errors` es null/undefined, retorna [].
- * - Si es un array, lo retorna directamente.
- * - Si es un objeto, aplana todos los valores (que se asumen arrays) en un solo array.
- *
- * @param errors - Errores provenientes del server action.
- * @returns Array de strings con todos los mensajes de error.
- *
- * @example
- * flattenErrors({ _form: ['Error de conexión'], email: ['Email inválido'] })
- * // => ['Error de conexión', 'Email inválido']
+ * Maneja ZodIssue[], errores manuales { _form: string[] } y nulos.
  */
-export function flattenErrors(errors: ServerErrors): string[] {
+export function flattenErrors(
+  errors: ZodIssue[] | { [key: string]: string[] | undefined } | null | undefined
+): string[] {
+  // 1. Si no hay errores, retornamos array vacío
   if (!errors) return [];
-  if (Array.isArray(errors)) return errors;
-  return Object.values(errors).flat();
+
+  // 2. Si es un array, procesamos cada elemento
+  if (Array.isArray(errors)) {
+    return errors.map((error) => {
+      // Si el elemento es un objeto (ZodIssue), extraemos el mensaje
+      if (typeof error === "object" && "message" in error) {
+        return error.message;
+      }
+      // Si ya es un string (error simple), lo devolvemos
+      return String(error);
+    });
+  }
+
+  // 3. Si es un objeto { _form: [...], campo: [...] }, aplanamos sus valores
+  return Object.values(errors)
+    .filter((val): val is string[] => Array.isArray(val))
+    .flat();
 }
