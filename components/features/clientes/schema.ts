@@ -4,6 +4,11 @@ const phoneRegexWithOne =
   /^(1[-.\s]?)?\(?(809|829|849)\)?[-.\s]?\d{3}[-.\s]?\d{4}$/;
 
 export const ClienteSchema = z.object({
+  id: z.coerce
+    .number()
+    .nullish()
+    .transform((val) => (!val ? undefined : val)),
+
   nombre: z.string().min(1, "Campo obligatorio"),
 
   rnc: z.coerce
@@ -40,17 +45,38 @@ export type ClienteInput = z.input<typeof ClienteSchema>;
 export type ClienteOutput = z.output<typeof ClienteSchema>;
 
 export type MiniCiudad = {
-
   id: number;
 
   nombre: string;
-
-}
+};
 export type Provincia = {
-
   id: number;
 
   nombre: string;
 
   ciudades: MiniCiudad[];
-}
+};
+
+export type Cliente = {
+  id: number;
+
+  nombre: string;
+
+  rnc: string;
+
+  direccion: string;
+
+  ciudad: Ciudad;
+
+  correo: string;
+
+  telefono: string;
+};
+
+export type Ciudad = {
+  id: number;
+
+  nombre: string;
+
+  provincia: string;
+};

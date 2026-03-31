@@ -11,51 +11,89 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Hash, Mail, MapPin, Phone, User, Map, Loader2, AlertCircle } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
 import {
-
-  useForm,
-  useController,
-  Control,
-} from "react-hook-form";
+  Hash,
+  Mail,
+  MapPin,
+  Phone,
+  User,
+  Map,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm, useController, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ClienteInput, ClienteOutput, ClienteSchema, Provincia } from "./schema";
+import {
+  ClienteInput,
+  ClienteOutput,
+  ClienteSchema,
+  Provincia,
+} from "./schema";
 import { startTransition, useActionState, useEffect } from "react";
-import { ActionState, createCliente } from "@/app/actions/clientes";
-import { flattenErrors, objectToFormData } from "@/lib/utils";
+import {
+  ActionState,
+  createCliente,
+  updateCliente,
+} from "@/app/actions/clientes";
+import {
+  flattenErrors,
+  formatDocument,
+  formatPhone,
+  objectToFormData,
+} from "@/lib/utils";
 import { toast } from "sonner";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useRouter } from "next/navigation";
 
 type Props = {
-  provincias: Provincia[]
-}
+  provincias: Provincia[];
+  closeDialog: () => void;
+  clienteDefaultValue: Partial<ClienteInput>;
+  tituloBoton: string;
+};
 
-export function CreateClientForm({ provincias }: Props) {
+export function CreateClientForm({
+  provincias,
+  closeDialog,
+  clienteDefaultValue,
+  tituloBoton,
+}: Props) {
   const {
     register,
     handleSubmit,
     formState: { errors },
     control,
+    reset,
   } = useForm<ClienteInput, undefined, ClienteOutput>({
+    defaultValues: clienteDefaultValue,
     resolver: zodResolver(ClienteSchema),
   });
-
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(createCliente, null)
+  const router = useRouter();
+  const action = clienteDefaultValue.id ? updateCliente : createCliente;
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+    action,
+    null,
+  );
 
   useEffect(() => {
     if (!state) return;
-    console.log("Devolvió algo??")
-    console.log(state)
+    console.log("Devolvió algo??");
+    console.log(state);
 
     if (state.success) {
-      toast(state.message, { position: 'top-center' })
+      toast(state.message, { position: "top-center" });
+      closeDialog();
+      reset();
+      router.refresh();
     }
+  }, [reset, state]);
 
-  }, [state])
-
+  useEffect(() => {
+    reset(clienteDefaultValue);
+  }, [clienteDefaultValue, reset]);
 
   const onSubmit = async (data: ClienteOutput) => {
     console.log("formularios", data);
@@ -64,8 +102,13 @@ export function CreateClientForm({ provincias }: Props) {
 
       const formData = objectToFormData<ClienteOutput>(data);
       formAction(formData);
-    })
+    });
   };
+
+  useEffect(() => {
+    console.log("usuario del form");
+    console.log(clienteDefaultValue);
+  }, []);
 
   return (
     <form
@@ -74,7 +117,9 @@ export function CreateClientForm({ provincias }: Props) {
       })}
       className="flex flex-col h-full min-h-0 gap-10"
     >
-      {state?.errors && <ErrorAlert description={flattenErrors(state.errors)} />}
+      {state?.errors && (
+        <ErrorAlert description={flattenErrors(state.errors)} />
+      )}
       <FieldGroup className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <Field className="mb-2">
           <Label htmlFor="name">Nombre o Razón social</Label>
@@ -158,7 +203,9 @@ export function CreateClientForm({ provincias }: Props) {
       </FieldGroup>
       <DialogFooter>
         <DialogClose asChild>
-          <Button variant="outline">Cancelar</Button>
+          <Button variant="outline" onClick={closeDialog}>
+            Cancelar
+          </Button>
         </DialogClose>
         <Button type="submit" disabled={isPending}>
           {isPending ? (
@@ -167,7 +214,7 @@ export function CreateClientForm({ provincias }: Props) {
               Guardando...
             </>
           ) : (
-            "Guardar cambios"
+            tituloBoton
           )}
         </Button>
       </DialogFooter>
@@ -176,14 +223,6 @@ export function CreateClientForm({ provincias }: Props) {
 }
 
 function PhoneInput({ control }: { control: Control<ClienteInput> }) {
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 10);
-    const match = digits.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
-    if (!match) return digits;
-    const parts = [match[1], match[2], match[3]].filter(Boolean);
-    return parts.length > 1 ? parts.join("-") : parts[0] || "";
-  };
-
   const {
     field: { value, onChange, onBlur, ref },
   } = useController<ClienteInput, "telefono">({
@@ -213,25 +252,6 @@ function PhoneInput({ control }: { control: Control<ClienteInput> }) {
 }
 
 function RncInput({ control }: { control: Control<ClienteInput> }) {
-  const formatDocument = (value: string): string => {
-    const digits = value.replace(/\D/g, "").slice(0, 11); // máximo 11 dígitos
-    const len = digits.length;
-
-    if (len <= 9) {
-      // Formato RNC: 1-XX-XXXXX-X
-      const match = digits.match(/^(\d{1})(\d{0,2})(\d{0,5})(\d{0,1})$/);
-      if (!match) return digits;
-      const parts = [match[1], match[2], match[3], match[4]].filter(Boolean);
-      return parts.join("-");
-    } else {
-      // Formato cédula: XXX-XXXXXXX-X
-      const match = digits.match(/^(\d{1,3})(\d{0,7})(\d{0,1})$/);
-      if (!match) return digits;
-      const parts = [match[1], match[2], match[3]].filter(Boolean);
-      return parts.join("-");
-    }
-  };
-
   const {
     field: { value, onChange, onBlur, ref },
   } = useController<ClienteInput, "rnc">({
@@ -260,7 +280,13 @@ function RncInput({ control }: { control: Control<ClienteInput> }) {
   );
 }
 
-function SelectInput({ control, provincias }: { control: Control<ClienteInput>, provincias: Provincia[] }) {
+function SelectInput({
+  control,
+  provincias,
+}: {
+  control: Control<ClienteInput>;
+  provincias: Provincia[];
+}) {
   const {
     field: { value, onChange, onBlur, ref },
   } = useController({
@@ -279,34 +305,30 @@ function SelectInput({ control, provincias }: { control: Control<ClienteInput>, 
         onChange(val);
       }} // pasa string, Zod transforma
       onOpenChange={onBlur} // maneja blur
-
     >
       <SelectTrigger ref={ref} className="w-full pl-8" id="city">
         <SelectValue placeholder="Seleccionar Ciudad" />
       </SelectTrigger>
       <SelectContent>
-        {
-          provincias.map(provincia => (
-            <SelectGroup key={provincia.id}>
-              <SelectLabel>{provincia.nombre}</SelectLabel>
-              {provincia.ciudades.map(ciudad => (
-                <SelectItem key={ciudad.id} value={ciudad.id.toString()}>
-                  {ciudad.nombre}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          ))
-        }
+        {provincias.map((provincia) => (
+          <SelectGroup key={provincia.id}>
+            <SelectLabel>{provincia.nombre}</SelectLabel>
+            {provincia.ciudades.map((ciudad) => (
+              <SelectItem key={ciudad.id} value={ciudad.id.toString()}>
+                {ciudad.nombre}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        ))}
       </SelectContent>
     </Select>
   );
 }
 
-
 type ErrorAlertProps = {
   description: string | string[];
-}
-export function ErrorAlert({ description }: ErrorAlertProps) {
+};
+function ErrorAlert({ description }: ErrorAlertProps) {
   const isArray = Array.isArray(description);
 
   return (

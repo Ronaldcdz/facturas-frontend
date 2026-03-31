@@ -155,3 +155,31 @@ export function flattenErrors(
     .filter((val): val is string[] => Array.isArray(val))
     .flat();
 }
+
+
+export function formatDocument(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 11); // máximo 11 dígitos
+  const len = digits.length;
+
+  if (len <= 9) {
+    // Formato RNC: 1-XX-XXXXX-X
+    const match = digits.match(/^(\d{1})(\d{0,2})(\d{0,5})(\d{0,1})$/);
+    if (!match) return digits;
+    const parts = [match[1], match[2], match[3], match[4]].filter(Boolean);
+    return parts.join("-");
+  } else {
+    // Formato cédula: XXX-XXXXXXX-X
+    const match = digits.match(/^(\d{1,3})(\d{0,7})(\d{0,1})$/);
+    if (!match) return digits;
+    const parts = [match[1], match[2], match[3]].filter(Boolean);
+    return parts.join("-");
+  }
+};
+
+export function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  const match = digits.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+  if (!match) return digits;
+  const parts = [match[1], match[2], match[3]].filter(Boolean);
+  return parts.length > 1 ? parts.join("-") : parts[0] || "";
+};
