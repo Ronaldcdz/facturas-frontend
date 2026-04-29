@@ -14,7 +14,7 @@ export type ActionState = {
   errors?: z.ZodIssue[] | { _form: string[] };
 } | null;
 
-const url = "https://facturas-backend-cuyf.onrender.com";
+const url = "https://facturas-backend-cuyf.onrender.com/clientes";
 
 export async function createCliente(
   prevState: ActionState,
