@@ -28,9 +28,14 @@ const fallbackCliente: Cliente = {
 
 async function getAllClientes(): Promise<Cliente[]> {
   try {
-    const response = await fetch("https://facturas-backend-cuyf.onrender.com", {
-      // next: { revalidate: 3600 } // opcional: caché en Next.js
-    });
+    const response = await fetch(
+      "https://facturas-backend-cuyf.onrender.com/clientes",
+      {
+        // next: { revalidate: 3600 } // opcional: caché en Next.js
+      },
+    );
+    console.log("server clientes");
+    console.log(response);
 
     if (!response.ok) {
       return [fallbackCliente];
@@ -47,9 +52,12 @@ async function getAllClientes(): Promise<Cliente[]> {
 
 async function getAllProvincias(): Promise<Provincia[]> {
   try {
-    const response = await fetch("https://facturas-backend-cuyf.onrender.com", {
-      // next: { revalidate: 3600 } // opcional: caché en Next.js
-    });
+    const response = await fetch(
+      "https://facturas-backend-cuyf.onrender.com/provincias",
+      {
+        // next: { revalidate: 3600 } // opcional: caché en Next.js
+      },
+    );
 
     if (!response.ok) {
       // Podrías lanzar un error o retornar un array con el placeholder
