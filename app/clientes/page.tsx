@@ -34,8 +34,6 @@ async function getAllClientes(): Promise<Cliente[]> {
         // next: { revalidate: 3600 } // opcional: caché en Next.js
       },
     );
-    console.log("server clientes");
-    console.log(response);
 
     if (!response.ok) {
       return [fallbackCliente];
