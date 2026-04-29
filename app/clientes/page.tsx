@@ -28,7 +28,7 @@ const fallbackCliente: Cliente = {
 
 async function getAllClientes(): Promise<Cliente[]> {
   try {
-    const response = await fetch("http://localhost:3000/clientes", {
+    const response = await fetch("https://facturas-backend-cuyf.onrender.com", {
       // next: { revalidate: 3600 } // opcional: caché en Next.js
     });
 
@@ -47,7 +47,7 @@ async function getAllClientes(): Promise<Cliente[]> {
 
 async function getAllProvincias(): Promise<Provincia[]> {
   try {
-    const response = await fetch("http://localhost:3000/provincias", {
+    const response = await fetch("https://facturas-backend-cuyf.onrender.com", {
       // next: { revalidate: 3600 } // opcional: caché en Next.js
     });
 
